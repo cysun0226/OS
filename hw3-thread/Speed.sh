@@ -1,6 +1,6 @@
 #!/bin/bash
-read -p "Input a number of times to run './a.out' : " T
-printf "\nRun time:"
+read -p "Input a number of times to run: " T
+printf "\nNon-thread run time:"
 
 ### Time Memo ###
 #(s) second: date +%s
@@ -9,6 +9,21 @@ printf "\nRun time:"
 #(ns)nanosecond: date +%s%N
 
 ### Speed.sh
+
+### example
+start=`date "+%s%6N"`
+./naive.out
+printf "\n   Finished once."
+for i in $(seq 2 ${T})
+do
+	./naive.out
+done
+end=`date "+%s%6N"`
+t1=$((($end-$start)/$T))
+printf "\n   Avg time: %d μs\n" ${t1}
+
+### thread
+printf "\nThread run time:"
 start=`date "+%s%6N"`
 ./a.out
 printf "\n   Finished once."
@@ -17,7 +32,12 @@ do
 	./a.out
 done
 end=`date "+%s%6N"`
-t1=$((($end-$start)/$T))
-printf "\n   Avg time: %d μs\n" ${t1}
+t2=$((($end-$start)/$T))
+printf "\n   Avg time: %d μs\n" ${t2}
+
+printf "\n----------\n"
+./cal_speed.out ${t1} ${t2}
+
+echo ""
 
 exit
