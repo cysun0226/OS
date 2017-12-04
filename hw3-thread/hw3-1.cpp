@@ -19,6 +19,7 @@ int imgWidth, imgHeight;
 int FILTER_SIZE;
 int FILTER_SCALE;
 int *filter_G;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 const char *inputfile_name[5] = {
 	"input1.bmp",
@@ -101,6 +102,19 @@ void *applyBlur(void* arg_ptr)
 	}
 }
 
+void *extend(void* color_ptr)
+{
+	int color = *((int *) color_ptr);
+	pthread_mutex_lock(&mutex);
+	for (int j = 0; j<imgHeight; j++) {
+		for (int i = 0; i<imgWidth; i++) {
+			pic_final[3 * (j*imgWidth + i) + color] = pic_blur[j*imgWidth + i];
+		}
+	}
+	pthread_mutex_unlock(&mutex);
+}
+
+/* main */
 int main()
 {
 	// read mask file
@@ -155,13 +169,23 @@ int main()
 		}
 
 		//extend the size form WxHx1 to WxHx3
-		for (int j = 0; j<imgHeight; j++) {
-			for (int i = 0; i<imgWidth; i++){
-				pic_final[3 * (j*imgWidth + i) + MYRED] = pic_blur[j*imgWidth + i];
-				pic_final[3 * (j*imgWidth + i) + MYGREEN] = pic_blur[j*imgWidth + i];
-				pic_final[3 * (j*imgWidth + i) + MYBLUE] = pic_blur[j*imgWidth + i];
-			}
-		}
+		int r = MYRED, g = MYGREEN, b = MYBLUE;
+		pthread_t red_thread, green_thread, blue_thread;
+		pthread_create(&red_thread, NULL, extend, &r);
+		pthread_create(&green_thread, NULL, extend, &g);
+		pthread_create(&blue_thread, NULL, extend, &b);
+
+		pthread_join( red_thread, NULL);
+		pthread_join( green_thread, NULL);
+		pthread_join( blue_thread, NULL);
+
+		// for (int j = 0; j<imgHeight; j++) {
+		// 	for (int i = 0; i<imgWidth; i++) {
+		// 		pic_final[3 * (j*imgWidth + i) + MYRED] = pic_blur[j*imgWidth + i];
+		// 		pic_final[3 * (j*imgWidth + i) + MYGREEN] = pic_blur[j*imgWidth + i];
+		// 		pic_final[3 * (j*imgWidth + i) + MYBLUE] = pic_blur[j*imgWidth + i];
+		// 	}
+		// }
 
 		// write output BMP file
 		bmpReader->WriteBMP(outputBlur_name[k], imgWidth, imgHeight, pic_final);
