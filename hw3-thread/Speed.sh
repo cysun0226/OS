@@ -12,8 +12,8 @@ printf "\nNon-thread run time:"
 ### Speed.sh
 
 ### example
-start=`date "+%s%6N"`
 g++ -std=c++11 -pthread $1 -o naive.out
+start=`date "+%s%6N"`
 ./naive.out
 printf "\n   Finished once."
 for i in $(seq 2 ${T})
@@ -26,8 +26,8 @@ printf "\n   Avg time: %d μs\n" ${t1}
 
 ### thread
 printf "\nThread run time:"
-start=`date "+%s%6N"`
 g++ -std=c++11 -pthread $2 -o a.out
+start=`date "+%s%6N"`
 ./a.out
 printf "\n   Finished once."
 for i in $(seq 2 ${T})
