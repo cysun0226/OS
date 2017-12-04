@@ -79,6 +79,25 @@ unsigned char GaussianFilter(int w, int h)
 	return (unsigned char)tmp;
 }
 
+// thread functions
+typedef struct
+{
+  unsigned char* pic_ptr;
+  int j_up;
+	int j_low;
+} Parameter;
+
+void *convertGrey(void* arg_ptr)
+{
+	Parameter* arg = (Parameter*) arg_ptr;
+	unsigned char* pic_grey = (unsigned char*) arg->pic_ptr;
+	for (int j = arg->j_low; j<arg->j_up; j++) {
+		for (int i = 0; i<imgWidth; i++){
+			pic_grey[j*imgWidth + i] = RGB2grey(i, j);
+		}
+	}
+}
+
 int main()
 {
 	// read mask file
@@ -103,11 +122,30 @@ int main()
 		pic_final = (unsigned char*)malloc(3 * imgWidth*imgHeight*sizeof(unsigned char));
 
 		//convert RGB image to grey image
-		for (int j = 0; j<imgHeight; j++) {
+		pthread_t grey_thread1, grey_thread2, grey_thread3, grey_thread4;
+		void *grey1_fin, *blur_fin;
+
+		Parameter arg;
+		arg.pic_ptr = pic_grey;
+		arg.j_low = 0;
+		arg.j_up = imgHeight/2;
+
+		pthread_create(&grey_thread1, NULL, convertGrey, &arg);
+
+		// for (int j = 0; j<imgHeight/2; j++) {
+		// 	for (int i = 0; i<imgWidth; i++){
+		// 		pic_grey[j*imgWidth + i] = RGB2grey(i, j);
+		// 	}
+		// }
+
+
+		for (int j = imgHeight/2; j<imgHeight; j++) {
 			for (int i = 0; i<imgWidth; i++){
 				pic_grey[j*imgWidth + i] = RGB2grey(i, j);
 			}
 		}
+
+		pthread_join( grey_thread1, &grey1_fin);
 
 		//apply the Gaussian filter to the image
 		for (int j = 0; j<imgHeight; j++) {
