@@ -34,14 +34,6 @@ const char *outputBlur_name[5] = {
 	"Blur4.bmp",
 	"Blur5.bmp"
 };
-/*
-const char *outputSobel_name[5] = {
-	"Sobel1.bmp",
-	"Sobel2.bmp",
-	"Sobel3.bmp",
-	"Sobel4.bmp",
-	"Sobel5.bmp"
-};*/
 
 unsigned char *pic_in, *pic_grey, *pic_blur, *pic_final;
 
@@ -92,8 +84,19 @@ void *convertGrey(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 	unsigned char* pic_grey = (unsigned char*) arg->pic_ptr;
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		for (int i = 0; i<imgWidth; i++){
+		for (int i = 0; i<imgWidth; i++) {
 			pic_grey[j*imgWidth + i] = RGB2grey(i, j);
+		}
+	}
+}
+
+void *applyBlur(void* arg_ptr)
+{
+	Parameter* arg = (Parameter*) arg_ptr;
+	unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
+	for (int j = arg->j_low; j<arg->j_up; j++) {
+		for (int i = 0; i<imgWidth; i++) {
+			pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
 		}
 	}
 }
@@ -123,29 +126,26 @@ int main()
 
 		//convert RGB image to grey image
 		pthread_t grey_thread1, grey_thread2, grey_thread3, grey_thread4;
-		void *grey1_fin, *blur_fin;
+		void *grey1_fin, *grey2_fin, *grey3_fin, *grey4_fin;
 
-		Parameter arg;
-		arg.pic_ptr = pic_grey;
-		arg.j_low = 0;
-		arg.j_up = imgHeight/2;
+		Parameter grey_arg1, grey_arg2, grey_arg3, grey_arg4;
+		grey_arg1.pic_ptr = pic_grey;
+		grey_arg1.j_low = 0; grey_arg1.j_up = imgHeight/4;
+		pthread_create(&grey_thread1, NULL, convertGrey, &grey_arg1);
+		grey_arg2.pic_ptr = pic_grey;
+		grey_arg2.j_low = imgHeight/4; grey_arg2.j_up = imgHeight/2;
+		pthread_create(&grey_thread2, NULL, convertGrey, &grey_arg2);
+		grey_arg3.pic_ptr = pic_grey;
+		grey_arg3.j_low = imgHeight/2; grey_arg3.j_up = (imgHeight/4)*3;
+		pthread_create(&grey_thread3, NULL, convertGrey, &grey_arg3);
+		grey_arg4.pic_ptr = pic_grey;
+		grey_arg4.j_low = (imgHeight/4)*3; grey_arg4.j_up = imgHeight;
+		pthread_create(&grey_thread4, NULL, convertGrey, &grey_arg4);
 
-		pthread_create(&grey_thread1, NULL, convertGrey, &arg);
-
-		// for (int j = 0; j<imgHeight/2; j++) {
-		// 	for (int i = 0; i<imgWidth; i++){
-		// 		pic_grey[j*imgWidth + i] = RGB2grey(i, j);
-		// 	}
-		// }
-
-
-		for (int j = imgHeight/2; j<imgHeight; j++) {
-			for (int i = 0; i<imgWidth; i++){
-				pic_grey[j*imgWidth + i] = RGB2grey(i, j);
-			}
-		}
-
-		pthread_join( grey_thread1, &grey1_fin);
+		pthread_join( grey_thread1, NULL);
+		pthread_join( grey_thread2, NULL);
+		pthread_join( grey_thread3, NULL);
+		pthread_join( grey_thread4, NULL);
 
 		//apply the Gaussian filter to the image
 		for (int j = 0; j<imgHeight; j++) {
