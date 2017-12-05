@@ -105,13 +105,13 @@ void *applyBlur(void* arg_ptr)
 void *extend(void* color_ptr)
 {
 	int color = *((int *) color_ptr);
-	pthread_mutex_lock(&mutex);
+	// pthread_mutex_lock(&mutex);
 	for (int j = 0; j<imgHeight; j++) {
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + color] = pic_blur[j*imgWidth + i];
 		}
 	}
-	pthread_mutex_unlock(&mutex);
+	// pthread_mutex_unlock(&mutex);
 }
 
 /* main */
