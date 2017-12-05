@@ -204,11 +204,25 @@ int main()
 		START = clock();
 		#endif
 
-		for (int j = 0; j<imgHeight; j++) {
-			for (int i = 0; i<imgWidth; i++){
-				pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
-			}
-		}
+		pthread_t blur_thread1, blur_thread2, blur_thread3, blur_thread4;
+		Parameter blur_arg1, blur_arg2, blur_arg3, blur_arg4;
+		blur_arg1.pic_ptr = pic_blur;
+		blur_arg1.j_low = 0; blur_arg1.j_up = imgHeight/2;
+		// pthread_join( grey_thread1, NULL);
+		pthread_create(&blur_thread1, NULL, applyBlur, &blur_arg1);
+		blur_arg2.pic_ptr = pic_blur;
+		blur_arg2.j_low = imgHeight/2; blur_arg2.j_up = imgHeight;
+		// // pthread_join( grey_thread2, NULL);
+		pthread_create(&blur_thread2, NULL, applyBlur, &blur_arg2);
+
+		// for (int j = 0; j<imgHeight; j++) {
+		// 	for (int i = 0; i<imgWidth; i++){
+		// 		pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
+		// 	}
+		// }
+
+		pthread_join( blur_thread1, NULL);
+		pthread_join( blur_thread2, NULL);
 
 		#ifdef PRINT_TIME
 		END = clock();
