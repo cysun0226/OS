@@ -84,21 +84,15 @@ unsigned char GaussianFilter(int w, int h)
 typedef struct
 {
   unsigned char* pic_ptr;
+	unsigned char* blur_ptr;
   int j_up;
 	int j_low;
 } Parameter;
 
-typedef struct
-{
-  unsigned char* pic_ptr;
-  int j_up;
-	int j_low;
-} Extend_Parameter;
-
 void *convertGrey(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
-	unsigned char* pic_grey = (unsigned char*) arg->pic_ptr;
+	// unsigned char* pic_grey = (unsigned char*) arg->pic_ptr;
 	for (int j = arg->j_low; j<arg->j_up; j++) {
 		for (int i = 0; i<imgWidth; i++) {
 			pic_grey[j*imgWidth + i] = RGB2grey(i, j);
@@ -109,7 +103,7 @@ void *convertGrey(void* arg_ptr)
 void *applyBlur(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
-	unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
+	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 	for (int j = arg->j_low; j<arg->j_up; j++) {
 		for (int i = 0; i<imgWidth; i++) {
 			pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
@@ -117,17 +111,19 @@ void *applyBlur(void* arg_ptr)
 	}
 }
 
-void *extend(void* color_ptr)
+void *extend(void* arg_ptr)
 {
-	int color = *((int *) color_ptr);
-	//pthread_mutex_lock(&mutex);
-	for (int j = 0; j<imgHeight; j++) {
+	Parameter* arg = (Parameter*) arg_ptr;
+	// unsigned char* pic_blur = (unsigned char*) arg->blur_ptr;
+	// pthread_mutex_lock(&mutex);
+	for (int j = arg->j_low; j<arg->j_up; j++) {
 		for (int i = 0; i<imgWidth; i++) {
-			pic_final[3 * (j*imgWidth + i) + color] = pic_blur[j*imgWidth + i];
+			pic_final[3 * (j*imgWidth + i) + MYRED] = pic_blur[j*imgWidth + i];
+			pic_final[3 * (j*imgWidth + i) + MYGREEN] = pic_blur[j*imgWidth + i];
+			pic_final[3 * (j*imgWidth + i) + MYBLUE] = pic_blur[j*imgWidth + i];
 		}
 	}
-	//pthread_mutex_unlock(&mutex);
-
+	// pthread_mutex_unlock(&mutex);
 }
 
 /* main */
@@ -173,27 +169,40 @@ int main()
 		pic_final = (unsigned char*)malloc(3 * imgWidth*imgHeight*sizeof(unsigned char));
 
 		//convert RGB image to grey image
-		pthread_t grey_thread1, grey_thread2, grey_thread3, grey_thread4;
-		void *grey1_fin, *grey2_fin, *grey3_fin, *grey4_fin;
+
 
 		#ifdef PRINT_TIME
 		cout << "Start grey." << endl;
 		START = clock();
 		#endif
 
+		pthread_t grey_thread1, grey_thread2, grey_thread3, grey_thread4;
+		pthread_t grey_thread5, grey_thread6, grey_thread7, grey_thread8;
+		void *grey1_fin, *grey2_fin, *grey3_fin, *grey4_fin;
 		Parameter grey_arg1, grey_arg2, grey_arg3, grey_arg4;
-		grey_arg1.pic_ptr = pic_grey;
-		grey_arg1.j_low = 0; grey_arg1.j_up = imgHeight/4;
+		Parameter grey_arg5, grey_arg6, grey_arg7, grey_arg8;
+
+		grey_arg1.j_low = 0; grey_arg1.j_up = imgHeight/8;
 		pthread_create(&grey_thread1, NULL, convertGrey, &grey_arg1);
-		grey_arg2.pic_ptr = pic_grey;
-		grey_arg2.j_low = imgHeight/4; grey_arg2.j_up = imgHeight/2;
+		grey_arg2.j_low = imgHeight/8; grey_arg2.j_up = imgHeight/4;
 		pthread_create(&grey_thread2, NULL, convertGrey, &grey_arg2);
-		grey_arg3.pic_ptr = pic_grey;
-		grey_arg3.j_low = imgHeight/2; grey_arg3.j_up = (imgHeight/4)*3;
+
+
+		grey_arg3.j_low = imgHeight/4; grey_arg3.j_up = (imgHeight/8)*3;
 		pthread_create(&grey_thread3, NULL, convertGrey, &grey_arg3);
-		grey_arg4.pic_ptr = pic_grey;
-		grey_arg4.j_low = (imgHeight/4)*3; grey_arg4.j_up = imgHeight;
+		grey_arg4.j_low = (imgHeight/8)*3; grey_arg4.j_up = imgHeight/2;
 		pthread_create(&grey_thread4, NULL, convertGrey, &grey_arg4);
+
+		grey_arg5.j_low = imgHeight/2; grey_arg5.j_up = (imgHeight/8)*5;
+		pthread_create(&grey_thread5, NULL, convertGrey, &grey_arg5);
+		grey_arg6.j_low = (imgHeight/8)*5; grey_arg6.j_up = (imgHeight/8)*6;
+		pthread_create(&grey_thread6, NULL, convertGrey, &grey_arg6);
+
+
+		grey_arg7.j_low = (imgHeight/8)*6; grey_arg7.j_up = (imgHeight/8)*7;
+		pthread_create(&grey_thread7, NULL, convertGrey, &grey_arg7);
+		grey_arg8.j_low = (imgHeight/8)*7; grey_arg8.j_up = imgHeight;
+		pthread_create(&grey_thread8, NULL, convertGrey, &grey_arg8);
 
 		// pthread_join( grey_thread1, NULL);
 		// pthread_join( grey_thread2, NULL);
@@ -249,20 +258,20 @@ int main()
 		blur_arg8.j_low = (imgHeight/8)*7; blur_arg8.j_up = imgHeight;
 		pthread_create(&blur_thread8, NULL, applyBlur, &blur_arg8);
 
-		pthread_join( blur_thread1, NULL);
-		pthread_join( blur_thread2, NULL);
-		pthread_join( blur_thread3, NULL);
-		pthread_join( blur_thread4, NULL);
-		pthread_join( blur_thread5, NULL);
-		pthread_join( blur_thread6, NULL);
-		pthread_join( blur_thread7, NULL);
-		pthread_join( blur_thread8, NULL);
-
 		// for (int j = 0; j<imgHeight; j++) {
 		// 	for (int i = 0; i<imgWidth; i++){
 		// 		pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
 		// 	}
 		// }
+
+		// pthread_join( blur_thread1, NULL);
+		// pthread_join( blur_thread2, NULL);
+		// pthread_join( blur_thread3, NULL);
+		// pthread_join( blur_thread4, NULL);
+		// pthread_join( blur_thread5, NULL);
+		// pthread_join( blur_thread6, NULL);
+		// pthread_join( blur_thread7, NULL);
+		// pthread_join( blur_thread8, NULL);
 
 		#ifdef PRINT_TIME
 		END = clock();
@@ -277,14 +286,57 @@ int main()
 		#endif
 
 		int r = MYRED, g = MYGREEN, b = MYBLUE;
-		pthread_t red_thread, green_thread, blue_thread;
-		pthread_create(&red_thread, NULL, extend, &r);
-		pthread_create(&green_thread, NULL, extend, &g);
-		pthread_create(&blue_thread, NULL, extend, &b);
+		// pthread_t red_thread, green_thread, blue_thread;
+		// pthread_create(&red_thread, NULL, extend, &r);
+		// pthread_create(&green_thread, NULL, extend, &g);
+		// pthread_create(&blue_thread, NULL, extend, &b);
+    //
+		// pthread_join( red_thread, NULL);
+		// pthread_join( green_thread, NULL);
+		// pthread_join( blue_thread, NULL);
 
-		pthread_join( red_thread, NULL);
-		pthread_join( green_thread, NULL);
-		pthread_join( blue_thread, NULL);
+		pthread_t fin_thread1, fin_thread2, fin_thread3, fin_thread4;
+		pthread_t fin_thread5, fin_thread6, fin_thread7, fin_thread8;
+		Parameter fin_arg1, fin_arg2, fin_arg3, fin_arg4;
+		Parameter fin_arg5, fin_arg6, fin_arg7, fin_arg8;
+
+		fin_arg1.j_low = 0; fin_arg1.j_up = (imgHeight/8);
+		pthread_join( blur_thread1, NULL);
+		pthread_create(&fin_thread1, NULL, extend, &fin_arg1);
+		fin_arg2.j_low = (imgHeight/8); fin_arg2.j_up = (imgHeight/4);
+		pthread_join( blur_thread2, NULL);
+		pthread_create(&fin_thread2, NULL, extend, &fin_arg2);
+
+		fin_arg3.j_low = imgHeight/4; fin_arg3.j_up = (imgHeight/8)*3;
+		pthread_join( blur_thread3, NULL);
+		pthread_create(&fin_thread3, NULL, extend, &fin_arg3);
+		fin_arg4.j_low = (imgHeight/8)*3; fin_arg4.j_up = imgHeight/2;
+		pthread_join( blur_thread4, NULL);
+		pthread_create(&fin_thread4, NULL, extend, &fin_arg4);
+
+		fin_arg5.j_low = imgHeight/2; fin_arg5.j_up = (imgHeight/8)*5;
+		pthread_join( blur_thread5, NULL);
+		pthread_create(&fin_thread5, NULL, extend, &fin_arg5);
+		fin_arg6.j_low = (imgHeight/8)*5; fin_arg6.j_up = (imgHeight/8)*6;
+		pthread_join( blur_thread6, NULL);
+		pthread_create(&fin_thread6, NULL, extend, &fin_arg6);
+
+		fin_arg7.j_low = (imgHeight/8)*6; fin_arg7.j_up = (imgHeight/8)*7;
+		pthread_join( blur_thread7, NULL);
+		pthread_create(&fin_thread7, NULL, extend, &fin_arg7);
+
+		fin_arg8.j_low = (imgHeight/8)*7; fin_arg8.j_up = imgHeight;
+		pthread_join( blur_thread8, NULL);
+		pthread_create(&fin_thread8, NULL, extend, &fin_arg8);
+
+		pthread_join( fin_thread1, NULL);
+		pthread_join( fin_thread2, NULL);
+		pthread_join( fin_thread3, NULL);
+		pthread_join( fin_thread4, NULL);
+		pthread_join( fin_thread5, NULL);
+		pthread_join( fin_thread6, NULL);
+		pthread_join( fin_thread7, NULL);
+		pthread_join( fin_thread8, NULL);
 
 		#ifdef PRINT_TIME
 		END = clock();
