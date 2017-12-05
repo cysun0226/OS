@@ -232,46 +232,35 @@ int main()
 		pthread_create(&blur_thread1, NULL, applyBlur, &blur_arg1);
 		blur_arg2.pic_ptr = pic_blur;
 		blur_arg2.j_low = imgHeight/8; blur_arg2.j_up = imgHeight/4;
+		pthread_join( grey_thread2, NULL);
 		pthread_create(&blur_thread2, NULL, applyBlur, &blur_arg2);
 
 		blur_arg3.pic_ptr = pic_blur;
 		blur_arg3.j_low = imgHeight/4; blur_arg3.j_up = (imgHeight/8)*3;
-		pthread_join( grey_thread2, NULL);
+		pthread_join( grey_thread3, NULL);
 		pthread_create(&blur_thread3, NULL, applyBlur, &blur_arg3);
 		blur_arg4.pic_ptr = pic_blur;
 		blur_arg4.j_low = (imgHeight/8)*3; blur_arg4.j_up = imgHeight/2;
+		pthread_join( grey_thread4, NULL);
 		pthread_create(&blur_thread4, NULL, applyBlur, &blur_arg4);
 
 		blur_arg5.pic_ptr = pic_blur;
 		blur_arg5.j_low = imgHeight/2; blur_arg5.j_up = (imgHeight/8)*5;
-		pthread_join( grey_thread3, NULL);
+		pthread_join( grey_thread5, NULL);
 		pthread_create(&blur_thread5, NULL, applyBlur, &blur_arg5);
 		blur_arg6.pic_ptr = pic_blur;
 		blur_arg6.j_low = (imgHeight/8)*5; blur_arg6.j_up = (imgHeight/8)*6;
+		pthread_join( grey_thread6, NULL);
 		pthread_create(&blur_thread6, NULL, applyBlur, &blur_arg6);
 
 		blur_arg7.pic_ptr = pic_blur;
 		blur_arg7.j_low = (imgHeight/8)*6; blur_arg7.j_up = (imgHeight/8)*7;
-		pthread_join( grey_thread4, NULL);
+		pthread_join( grey_thread7, NULL);
 		pthread_create(&blur_thread7, NULL, applyBlur, &blur_arg7);
 		blur_arg8.pic_ptr = pic_blur;
 		blur_arg8.j_low = (imgHeight/8)*7; blur_arg8.j_up = imgHeight;
+		pthread_join( grey_thread8, NULL);
 		pthread_create(&blur_thread8, NULL, applyBlur, &blur_arg8);
-
-		// for (int j = 0; j<imgHeight; j++) {
-		// 	for (int i = 0; i<imgWidth; i++){
-		// 		pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
-		// 	}
-		// }
-
-		// pthread_join( blur_thread1, NULL);
-		// pthread_join( blur_thread2, NULL);
-		// pthread_join( blur_thread3, NULL);
-		// pthread_join( blur_thread4, NULL);
-		// pthread_join( blur_thread5, NULL);
-		// pthread_join( blur_thread6, NULL);
-		// pthread_join( blur_thread7, NULL);
-		// pthread_join( blur_thread8, NULL);
 
 		#ifdef PRINT_TIME
 		END = clock();
@@ -286,14 +275,6 @@ int main()
 		#endif
 
 		int r = MYRED, g = MYGREEN, b = MYBLUE;
-		// pthread_t red_thread, green_thread, blue_thread;
-		// pthread_create(&red_thread, NULL, extend, &r);
-		// pthread_create(&green_thread, NULL, extend, &g);
-		// pthread_create(&blue_thread, NULL, extend, &b);
-    //
-		// pthread_join( red_thread, NULL);
-		// pthread_join( green_thread, NULL);
-		// pthread_join( blue_thread, NULL);
 
 		pthread_t fin_thread1, fin_thread2, fin_thread3, fin_thread4;
 		pthread_t fin_thread5, fin_thread6, fin_thread7, fin_thread8;
@@ -343,14 +324,6 @@ int main()
 		cout << "Extend time：" << (END - START) << " ms" << endl;
 		cout << endl;
 		#endif
-
-		// for (int j = 0; j<imgHeight; j++) {
-		// 	for (int i = 0; i<imgWidth; i++) {
-		// 		pic_final[3 * (j*imgWidth + i) + MYRED] = pic_blur[j*imgWidth + i];
-		// 		pic_final[3 * (j*imgWidth + i) + MYGREEN] = pic_blur[j*imgWidth + i];
-		// 		pic_final[3 * (j*imgWidth + i) + MYBLUE] = pic_blur[j*imgWidth + i];
-		// 	}
-		// }
 
 		// write output BMP file
 		#ifdef PRINT_TIME
