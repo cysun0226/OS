@@ -88,6 +88,13 @@ typedef struct
 	int j_low;
 } Parameter;
 
+typedef struct
+{
+  unsigned char* pic_ptr;
+  int j_up;
+	int j_low;
+} Extend_Parameter;
+
 void *convertGrey(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
@@ -113,13 +120,14 @@ void *applyBlur(void* arg_ptr)
 void *extend(void* color_ptr)
 {
 	int color = *((int *) color_ptr);
-	// pthread_mutex_lock(&mutex);
+	//pthread_mutex_lock(&mutex);
 	for (int j = 0; j<imgHeight; j++) {
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + color] = pic_blur[j*imgWidth + i];
 		}
 	}
-	// pthread_mutex_unlock(&mutex);
+	//pthread_mutex_unlock(&mutex);
+
 }
 
 /* main */
@@ -205,39 +213,56 @@ int main()
 		#endif
 
 		pthread_t blur_thread1, blur_thread2, blur_thread3, blur_thread4;
+		pthread_t blur_thread5, blur_thread6, blur_thread7, blur_thread8;
 		Parameter blur_arg1, blur_arg2, blur_arg3, blur_arg4;
+		Parameter blur_arg5, blur_arg6, blur_arg7, blur_arg8;
+
 		blur_arg1.pic_ptr = pic_blur;
-		blur_arg1.j_low = 0; blur_arg1.j_up = imgHeight/4;
+		blur_arg1.j_low = 0; blur_arg1.j_up = imgHeight/8;
 		pthread_join( grey_thread1, NULL);
 		pthread_create(&blur_thread1, NULL, applyBlur, &blur_arg1);
 		blur_arg2.pic_ptr = pic_blur;
-		blur_arg2.j_low = imgHeight/4; blur_arg2.j_up = imgHeight/2;
-		pthread_join( grey_thread2, NULL);
+		blur_arg2.j_low = imgHeight/8; blur_arg2.j_up = imgHeight/4;
 		pthread_create(&blur_thread2, NULL, applyBlur, &blur_arg2);
+
 		blur_arg3.pic_ptr = pic_blur;
-		blur_arg3.j_low = imgHeight/2; blur_arg3.j_up = (imgHeight/4)*3;
-		pthread_join( grey_thread3, NULL);
+		blur_arg3.j_low = imgHeight/4; blur_arg3.j_up = (imgHeight/8)*3;
+		pthread_join( grey_thread2, NULL);
 		pthread_create(&blur_thread3, NULL, applyBlur, &blur_arg3);
 		blur_arg4.pic_ptr = pic_blur;
-		blur_arg4.j_low = (imgHeight/4)*3; blur_arg4.j_up = imgHeight;
-		pthread_join( grey_thread4, NULL);
+		blur_arg4.j_low = (imgHeight/8)*3; blur_arg4.j_up = imgHeight/2;
 		pthread_create(&blur_thread4, NULL, applyBlur, &blur_arg4);
+
+		blur_arg5.pic_ptr = pic_blur;
+		blur_arg5.j_low = imgHeight/2; blur_arg5.j_up = (imgHeight/8)*5;
+		pthread_join( grey_thread3, NULL);
+		pthread_create(&blur_thread5, NULL, applyBlur, &blur_arg5);
+		blur_arg6.pic_ptr = pic_blur;
+		blur_arg6.j_low = (imgHeight/8)*5; blur_arg6.j_up = (imgHeight/8)*6;
+		pthread_create(&blur_thread6, NULL, applyBlur, &blur_arg6);
+
+		blur_arg7.pic_ptr = pic_blur;
+		blur_arg7.j_low = (imgHeight/8)*6; blur_arg7.j_up = (imgHeight/8)*7;
+		pthread_join( grey_thread4, NULL);
+		pthread_create(&blur_thread7, NULL, applyBlur, &blur_arg7);
+		blur_arg8.pic_ptr = pic_blur;
+		blur_arg8.j_low = (imgHeight/8)*7; blur_arg8.j_up = imgHeight;
+		pthread_create(&blur_thread8, NULL, applyBlur, &blur_arg8);
 
 		pthread_join( blur_thread1, NULL);
 		pthread_join( blur_thread2, NULL);
 		pthread_join( blur_thread3, NULL);
 		pthread_join( blur_thread4, NULL);
+		pthread_join( blur_thread5, NULL);
+		pthread_join( blur_thread6, NULL);
+		pthread_join( blur_thread7, NULL);
+		pthread_join( blur_thread8, NULL);
 
 		// for (int j = 0; j<imgHeight; j++) {
 		// 	for (int i = 0; i<imgWidth; i++){
 		// 		pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
 		// 	}
 		// }
-
-		pthread_join( blur_thread1, NULL);
-		pthread_join( blur_thread2, NULL);
-		pthread_join( blur_thread3, NULL);
-		pthread_join( blur_thread4, NULL);
 
 		#ifdef PRINT_TIME
 		END = clock();
