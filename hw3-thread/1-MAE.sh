@@ -1,6 +1,7 @@
 g++ -std=c++11 -pthread $1
 ./a.out
-echo "\n--- check Blur1.bmp ---"
+echo ""
+echo "--- check Blur1.bmp ---"
 ./MAE.out ANS/Blur1.bmp Blur1.bmp
 echo "--- check Blur2.bmp ---"
 ./MAE.out ANS/Blur2.bmp Blur2.bmp
