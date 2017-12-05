@@ -187,10 +187,10 @@ int main()
 		grey_arg4.j_low = (imgHeight/4)*3; grey_arg4.j_up = imgHeight;
 		pthread_create(&grey_thread4, NULL, convertGrey, &grey_arg4);
 
-		pthread_join( grey_thread1, NULL);
-		pthread_join( grey_thread2, NULL);
-		pthread_join( grey_thread3, NULL);
-		pthread_join( grey_thread4, NULL);
+		// pthread_join( grey_thread1, NULL);
+		// pthread_join( grey_thread2, NULL);
+		// pthread_join( grey_thread3, NULL);
+		// pthread_join( grey_thread4, NULL);
 
 		#ifdef PRINT_TIME
 		END = clock();
