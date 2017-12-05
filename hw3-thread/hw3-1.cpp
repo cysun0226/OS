@@ -9,6 +9,13 @@
 #include <math.h>
 #include <pthread.h>
 #include <semaphore.h>
+
+// #define PRINT_TIME
+
+#ifdef PRINT_TIME
+#include "time.h"
+#endif
+
 using namespace std;
 
 #define MYRED	2
@@ -16,6 +23,8 @@ using namespace std;
 #define MYBLUE	0
 
 int imgWidth, imgHeight;
+int ws;
+// #define ws 3
 int FILTER_SIZE;
 int FILTER_SCALE;
 int *filter_G;
@@ -54,17 +63,16 @@ unsigned char GaussianFilter(int w, int h)
 {
 	int tmp = 0;
 	int a, b;
-	int ws = (int)sqrt((float)FILTER_SIZE);
-	for (int j = 0; j<ws; j++)
-	for (int i = 0; i<ws; i++)
+	for (int j = 0; j<::ws; j++)
+	for (int i = 0; i<::ws; i++)
 	{
-		a = w + i - (ws / 2);
-		b = h + j - (ws / 2);
+		a = w + i - (::ws / 2);
+		b = h + j - (::ws / 2);
 
 		// detect for borders of the image
 		if (a<0 || b<0 || a>=imgWidth || b>=imgHeight) continue;
 
-		tmp += filter_G[j*ws + i] * pic_grey[b*imgWidth + a];
+		tmp += filter_G[j*::ws + i] * pic_grey[b*imgWidth + a];
 	};
 	tmp /= FILTER_SCALE;
 	if (tmp < 0) tmp = 0;
@@ -124,13 +132,31 @@ int main()
 	fscanf(mask, "%d", &FILTER_SCALE);
 
 	filter_G = new int[FILTER_SIZE];
+	::ws = (int)sqrt((float)FILTER_SIZE);
+	// ::ws = 3;
+
+	#ifdef PRINT_TIME
+	double START,END;
+	cout << "Start read mask file." << endl;
+	START = clock();
+	#endif
 	for (int i = 0; i<FILTER_SIZE; i++)
 		fscanf(mask, "%d", &filter_G[i]);
 	fclose(mask);
+	#ifdef PRINT_TIME
+	END = clock();
+	cout << "Read file time：" << (END - START) / CLOCKS_PER_SEC << " s" << endl;
+	cout << endl;
+	#endif
 
 
 	BmpReader* bmpReader = new BmpReader();
 	for (int k = 0; k<5; k++){
+
+		#ifdef PRINT_TIME
+		cout << "--- image " << k << "---\n" << endl;
+		#endif
+
 		// read input BMP file
 		pic_in = bmpReader->ReadBMP(inputfile_name[k], &imgWidth, &imgHeight);
 		// allocate space for output image
@@ -141,6 +167,11 @@ int main()
 		//convert RGB image to grey image
 		pthread_t grey_thread1, grey_thread2, grey_thread3, grey_thread4;
 		void *grey1_fin, *grey2_fin, *grey3_fin, *grey4_fin;
+
+		#ifdef PRINT_TIME
+		cout << "Start grey." << endl;
+		START = clock();
+		#endif
 
 		Parameter grey_arg1, grey_arg2, grey_arg3, grey_arg4;
 		grey_arg1.pic_ptr = pic_grey;
@@ -161,14 +192,36 @@ int main()
 		pthread_join( grey_thread3, NULL);
 		pthread_join( grey_thread4, NULL);
 
+		#ifdef PRINT_TIME
+		END = clock();
+		cout << "Grey time：" << (END - START) << " ms" << endl;
+		cout << endl;
+		#endif
+
 		//apply the Gaussian filter to the image
+		#ifdef PRINT_TIME
+		cout << "Start filter." << endl;
+		START = clock();
+		#endif
+
 		for (int j = 0; j<imgHeight; j++) {
 			for (int i = 0; i<imgWidth; i++){
 				pic_blur[j*imgWidth + i] = GaussianFilter(i, j);
 			}
 		}
 
+		#ifdef PRINT_TIME
+		END = clock();
+		cout << "Filter time：" << (END - START) << " ms" << endl;
+		cout << endl;
+		#endif
+
 		//extend the size form WxHx1 to WxHx3
+		#ifdef PRINT_TIME
+		cout << "Start extend." << endl;
+		START = clock();
+		#endif
+
 		int r = MYRED, g = MYGREEN, b = MYBLUE;
 		pthread_t red_thread, green_thread, blue_thread;
 		pthread_create(&red_thread, NULL, extend, &r);
@@ -179,6 +232,12 @@ int main()
 		pthread_join( green_thread, NULL);
 		pthread_join( blue_thread, NULL);
 
+		#ifdef PRINT_TIME
+		END = clock();
+		cout << "Extend time：" << (END - START) << " ms" << endl;
+		cout << endl;
+		#endif
+
 		// for (int j = 0; j<imgHeight; j++) {
 		// 	for (int i = 0; i<imgWidth; i++) {
 		// 		pic_final[3 * (j*imgWidth + i) + MYRED] = pic_blur[j*imgWidth + i];
@@ -188,7 +247,18 @@ int main()
 		// }
 
 		// write output BMP file
+		#ifdef PRINT_TIME
+		cout << "Start write." << endl;
+		START = clock();
+		#endif
+
 		bmpReader->WriteBMP(outputBlur_name[k], imgWidth, imgHeight, pic_final);
+
+		#ifdef PRINT_TIME
+		END = clock();
+		cout << "Write time：" << (END - START) << " ms" << endl;
+		cout << endl;
+		#endif
 
 		//free memory space
 		free(pic_in);
