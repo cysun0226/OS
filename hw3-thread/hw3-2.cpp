@@ -312,6 +312,11 @@ int main()
 		pthread_create(&img_thread8, NULL, computeImg, &arg8);
 
 		//extend the size form WxHx1 to WxHx3
+		arg1.j_low = 0; arg1.j_up = imgHeight/4;
+		arg2.j_low = imgHeight/4; arg2.j_up = imgHeight/2;
+		arg3.j_low = imgHeight/2; arg3.j_up = (imgHeight/4)*3;
+		arg4.j_low = (imgHeight/4)*3; arg4.j_up = imgHeight;
+
 		pthread_t ext_r_thread1, ext_r_thread2, ext_r_thread3, ext_r_thread4;
 		pthread_t ext_r_thread5, ext_r_thread6, ext_r_thread7, ext_r_thread8;
 		pthread_t ext_g_thread1, ext_g_thread2, ext_g_thread3, ext_g_thread4;
@@ -320,72 +325,72 @@ int main()
 		pthread_t ext_b_thread5, ext_b_thread6, ext_b_thread7, ext_b_thread8;
 
 		pthread_join( img_thread1, NULL);
+		pthread_join( img_thread2, NULL);
 		pthread_create(&ext_r_thread1, NULL, extend_r, &arg1);
 		pthread_create(&ext_g_thread1, NULL, extend_g, &arg1);
 		pthread_create(&ext_b_thread1, NULL, extend_b, &arg1);
 
-		pthread_join( img_thread2, NULL);
+		pthread_join( img_thread3, NULL);
+		pthread_join( img_thread4, NULL);
 		pthread_create(&ext_r_thread2, NULL, extend_r, &arg2);
 		pthread_create(&ext_g_thread2, NULL, extend_g, &arg2);
 		pthread_create(&ext_b_thread2, NULL, extend_b, &arg2);
 
-		pthread_join( img_thread3, NULL);
+		pthread_join( img_thread5, NULL);
+		pthread_join( img_thread6, NULL);
 		pthread_create(&ext_r_thread3, NULL, extend_r, &arg3);
 		pthread_create(&ext_g_thread3, NULL, extend_g, &arg3);
 		pthread_create(&ext_b_thread3, NULL, extend_b, &arg3);
 
-		pthread_join( img_thread4, NULL);
+		pthread_join( img_thread7, NULL);
+		pthread_join( img_thread8, NULL);
 		pthread_create(&ext_r_thread4, NULL, extend_r, &arg4);
 		pthread_create(&ext_g_thread4, NULL, extend_g, &arg4);
 		pthread_create(&ext_b_thread4, NULL, extend_b, &arg4);
 
-		pthread_join( img_thread5, NULL);
-		pthread_create(&ext_r_thread5, NULL, extend_r, &arg5);
-		pthread_create(&ext_g_thread5, NULL, extend_g, &arg5);
-		pthread_create(&ext_b_thread5, NULL, extend_b, &arg5);
-
-		pthread_join( img_thread6, NULL);
-		pthread_create(&ext_r_thread6, NULL, extend_r, &arg6);
-		pthread_create(&ext_g_thread6, NULL, extend_g, &arg6);
-		pthread_create(&ext_b_thread6, NULL, extend_b, &arg6);
-
-		pthread_join( img_thread7, NULL);
-		pthread_create(&ext_r_thread7, NULL, extend_r, &arg7);
-		pthread_create(&ext_g_thread7, NULL, extend_g, &arg7);
-		pthread_create(&ext_b_thread7, NULL, extend_b, &arg7);
-
-		pthread_join( img_thread8, NULL);
-		pthread_create(&ext_r_thread8, NULL, extend_r, &arg8);
-		pthread_create(&ext_g_thread8, NULL, extend_g, &arg8);
-		pthread_create(&ext_b_thread8, NULL, extend_b, &arg8);
+		// pthread_create(&ext_r_thread5, NULL, extend_r, &arg5);
+		// pthread_create(&ext_g_thread5, NULL, extend_g, &arg5);
+		// pthread_create(&ext_b_thread5, NULL, extend_b, &arg5);
+    //
+		// pthread_create(&ext_r_thread6, NULL, extend_r, &arg6);
+		// pthread_create(&ext_g_thread6, NULL, extend_g, &arg6);
+		// pthread_create(&ext_b_thread6, NULL, extend_b, &arg6);
+    //
+		// pthread_create(&ext_r_thread7, NULL, extend_r, &arg7);
+		// pthread_create(&ext_g_thread7, NULL, extend_g, &arg7);
+		// pthread_create(&ext_b_thread7, NULL, extend_b, &arg7);
+    //
+		// pthread_create(&ext_r_thread8, NULL, extend_r, &arg8);
+		// pthread_create(&ext_g_thread8, NULL, extend_g, &arg8);
+		// pthread_create(&ext_b_thread8, NULL, extend_b, &arg8);
 
 		pthread_join( ext_r_thread1, NULL);
 		pthread_join( ext_r_thread2, NULL);
 		pthread_join( ext_r_thread3, NULL);
 		pthread_join( ext_r_thread4, NULL);
-		pthread_join( ext_r_thread5, NULL);
-		pthread_join( ext_r_thread6, NULL);
-		pthread_join( ext_r_thread7, NULL);
-		pthread_join( ext_r_thread8, NULL);
+		// pthread_join( ext_r_thread5, NULL);
+		// pthread_join( ext_r_thread6, NULL);
+		// pthread_join( ext_r_thread7, NULL);
+		// pthread_join( ext_r_thread8, NULL);
 
 		pthread_join( ext_g_thread1, NULL);
 		pthread_join( ext_g_thread2, NULL);
 		pthread_join( ext_g_thread3, NULL);
 		pthread_join( ext_g_thread4, NULL);
-		pthread_join( ext_g_thread5, NULL);
-		pthread_join( ext_g_thread6, NULL);
-		pthread_join( ext_g_thread7, NULL);
-		pthread_join( ext_g_thread8, NULL);
+		// pthread_join( ext_g_thread5, NULL);
+		// pthread_join( ext_g_thread6, NULL);
+		// pthread_join( ext_g_thread7, NULL);
+		// pthread_join( ext_g_thread8, NULL);
 
 		pthread_join( ext_b_thread1, NULL);
 		pthread_join( ext_b_thread2, NULL);
 		pthread_join( ext_b_thread3, NULL);
 		pthread_join( ext_b_thread4, NULL);
 
-		pthread_join( ext_b_thread5, NULL);
-		pthread_join( ext_b_thread6, NULL);
-		pthread_join( ext_b_thread7, NULL);
-		pthread_join( ext_b_thread8, NULL);
+		// pthread_join( ext_b_thread5, NULL);
+		// pthread_join( ext_b_thread6, NULL);
+		// pthread_join( ext_b_thread7, NULL);
+		// pthread_join( ext_b_thread8, NULL);
 
 		// for (int j = 0; j<imgHeight; j++) {
 		// 	for (int i = 0; i<imgWidth; i++){
