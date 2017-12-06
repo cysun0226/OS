@@ -21,7 +21,8 @@ int FILTER_SIZE;
 int FILTER_SCALE;
 int *filter_x;
 int *filter_y;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+sem_t sem;
 
 const char *inputfile_name[5] = {
 	"input1.bmp",
@@ -144,9 +145,11 @@ void *extend_r(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
+		sem_wait(&sem);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYRED] = image[j*imgWidth + i];
 		}
+		sem_post(&sem);
 	}
 }
 
@@ -155,9 +158,11 @@ void *extend_g(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
+		sem_wait(&sem);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYGREEN] = image[j*imgWidth + i];
 		}
+		sem_post(&sem);
 	}
 }
 
@@ -166,15 +171,20 @@ void *extend_b(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
+		sem_wait(&sem);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYBLUE] = image[j*imgWidth + i];
 		}
+		sem_post(&sem);
 	}
 }
 
 
 int main()
 {
+	// initialize semaphore
+	sem_init(&sem, 0, 1);
+
 	// read mask file
 	FILE* mask;
 	mask = fopen("mask_Sobel.txt", "r");
