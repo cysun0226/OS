@@ -347,38 +347,82 @@ int main()
 		// pthread_create(&fin_thread2, NULL, extend, &fin_arg2);
 
 		fin_arg3.j_low = imgHeight/4; fin_arg3.j_up = (imgHeight/8)*3;
+		fin_arg3_r.j_low = (imgHeight/4); fin_arg3_r.j_up = (imgHeight/8)*3; fin_arg3_r.color_ptr = r;
+		fin_arg3_g.j_low = (imgHeight/4); fin_arg3_g.j_up = (imgHeight/8)*3; fin_arg3_g.color_ptr = g;
+		fin_arg3_b.j_low = (imgHeight/4); fin_arg3_b.j_up = (imgHeight/8)*3; fin_arg3_b.color_ptr = b;
 		pthread_join( blur_thread3, NULL);
-		pthread_create(&fin_thread3, NULL, extend, &fin_arg3);
+		// pthread_create(&fin_thread3, NULL, extend, &fin_arg3);
+		pthread_create(&fin_thread3_r, NULL, extend_color, &fin_arg3_r);
+		pthread_create(&fin_thread3_g, NULL, extend_color, &fin_arg3_g);
+		pthread_create(&fin_thread3_b, NULL, extend_color, &fin_arg3_b);
+
 		fin_arg4.j_low = (imgHeight/8)*3; fin_arg4.j_up = imgHeight/2;
+		fin_arg4_r.j_low = (imgHeight/8)*3; fin_arg4_r.j_up = imgHeight/2; fin_arg4_r.color_ptr = r;
+		fin_arg4_g.j_low = (imgHeight/8)*3; fin_arg4_g.j_up = imgHeight/2; fin_arg4_g.color_ptr = g;
+		fin_arg4_b.j_low = (imgHeight/8)*3; fin_arg4_b.j_up = imgHeight/2; fin_arg4_b.color_ptr = b;
 		pthread_join( blur_thread4, NULL);
-		pthread_create(&fin_thread4, NULL, extend, &fin_arg4);
+		// pthread_create(&fin_thread4, NULL, extend, &fin_arg4);
+		pthread_create(&fin_thread4_r, NULL, extend_color, &fin_arg4_r);
+		pthread_create(&fin_thread4_g, NULL, extend_color, &fin_arg4_g);
+		pthread_create(&fin_thread4_b, NULL, extend_color, &fin_arg4_b);
 
 		fin_arg5.j_low = imgHeight/2; fin_arg5.j_up = (imgHeight/8)*5;
+		fin_arg5_r.j_low = imgHeight/2; fin_arg5_r.j_up = (imgHeight/8)*5; fin_arg5_r.color_ptr = r;
+		fin_arg5_g.j_low = imgHeight/2; fin_arg5_g.j_up = (imgHeight/8)*5; fin_arg5_g.color_ptr = g;
+		fin_arg5_b.j_low = imgHeight/2; fin_arg5_b.j_up = (imgHeight/8)*5; fin_arg5_b.color_ptr = b;
 		pthread_join( blur_thread5, NULL);
-		pthread_create(&fin_thread5, NULL, extend, &fin_arg5);
+		// pthread_create(&fin_thread5, NULL, extend, &fin_arg5);
+		pthread_create(&fin_thread5_r, NULL, extend_color, &fin_arg5_r);
+		pthread_create(&fin_thread5_g, NULL, extend_color, &fin_arg5_g);
+		pthread_create(&fin_thread5_b, NULL, extend_color, &fin_arg5_b);
+
 		fin_arg6.j_low = (imgHeight/8)*5; fin_arg6.j_up = (imgHeight/8)*6;
+		fin_arg6_r.j_low = (imgHeight/8)*5; fin_arg6_r.j_up = (imgHeight/8)*6; fin_arg6_r.color_ptr = r;
+		fin_arg6_g.j_low = (imgHeight/8)*5; fin_arg6_g.j_up = (imgHeight/8)*6; fin_arg6_g.color_ptr = g;
+		fin_arg6_b.j_low = (imgHeight/8)*5; fin_arg6_b.j_up = (imgHeight/8)*6; fin_arg6_b.color_ptr = b;
 		pthread_join( blur_thread6, NULL);
-		pthread_create(&fin_thread6, NULL, extend, &fin_arg6);
+		// pthread_create(&fin_thread6, NULL, extend, &fin_arg6);
+		pthread_create(&fin_thread6_r, NULL, extend_color, &fin_arg6_r);
+		pthread_create(&fin_thread6_g, NULL, extend_color, &fin_arg6_g);
+		pthread_create(&fin_thread6_b, NULL, extend_color, &fin_arg6_b);
 
 		fin_arg7.j_low = (imgHeight/8)*6; fin_arg7.j_up = (imgHeight/8)*7;
+		fin_arg7_r.j_low = (imgHeight/8)*6; fin_arg7_r.j_up = (imgHeight/8)*7; fin_arg7_r.color_ptr = r;
+		fin_arg7_g.j_low = (imgHeight/8)*6; fin_arg7_g.j_up = (imgHeight/8)*7; fin_arg7_g.color_ptr = g;
+		fin_arg7_b.j_low = (imgHeight/8)*6; fin_arg7_b.j_up = (imgHeight/8)*7; fin_arg7_b.color_ptr = b;
 		pthread_join( blur_thread7, NULL);
-		pthread_create(&fin_thread7, NULL, extend, &fin_arg7);
+		// pthread_create(&fin_thread7, NULL, extend, &fin_arg7);
+		pthread_create(&fin_thread7_r, NULL, extend_color, &fin_arg7_r);
+		pthread_create(&fin_thread7_g, NULL, extend_color, &fin_arg7_g);
+		pthread_create(&fin_thread7_b, NULL, extend_color, &fin_arg7_b);
 
 		fin_arg8.j_low = (imgHeight/8)*7; fin_arg8.j_up = imgHeight;
+		fin_arg8_r.j_low = (imgHeight/8)*7; fin_arg8_r.j_up = imgHeight; fin_arg8_r.color_ptr = r;
+		fin_arg8_g.j_low = (imgHeight/8)*7; fin_arg8_g.j_up = imgHeight; fin_arg8_g.color_ptr = g;
+		fin_arg8_b.j_low = (imgHeight/8)*7; fin_arg8_b.j_up = imgHeight; fin_arg8_b.color_ptr = b;
 		pthread_join( blur_thread8, NULL);
-		pthread_create(&fin_thread8, NULL, extend, &fin_arg8);
+		// pthread_create(&fin_thread8, NULL, extend, &fin_arg8);
+		pthread_create(&fin_thread8_r, NULL, extend_color, &fin_arg8_r);
+		pthread_create(&fin_thread8_g, NULL, extend_color, &fin_arg8_g);
+		pthread_create(&fin_thread8_b, NULL, extend_color, &fin_arg8_b);
 
-		//pthread_join( fin_thread1, NULL);
+		// pthread_join( fin_thread1, NULL);
 		// pthread_join( fin_thread2, NULL);
-		pthread_join( fin_thread3, NULL);
-		pthread_join( fin_thread4, NULL);
-		pthread_join( fin_thread5, NULL);
-		pthread_join( fin_thread6, NULL);
-		pthread_join( fin_thread7, NULL);
-		pthread_join( fin_thread8, NULL);
+		// pthread_join( fin_thread3, NULL);
+		// pthread_join( fin_thread4, NULL);
+		// pthread_join( fin_thread5, NULL);
+		// pthread_join( fin_thread6, NULL);
+		// pthread_join( fin_thread7, NULL);
+		// pthread_join( fin_thread8, NULL);
 
 		pthread_join( fin_thread1_r, NULL);	pthread_join( fin_thread1_g, NULL);	pthread_join( fin_thread1_b, NULL);
 		pthread_join( fin_thread2_r, NULL);	pthread_join( fin_thread2_g, NULL);	pthread_join( fin_thread2_b, NULL);
+		pthread_join( fin_thread3_r, NULL);	pthread_join( fin_thread3_g, NULL);	pthread_join( fin_thread3_b, NULL);
+		pthread_join( fin_thread4_r, NULL);	pthread_join( fin_thread4_g, NULL);	pthread_join( fin_thread4_b, NULL);
+		pthread_join( fin_thread5_r, NULL);	pthread_join( fin_thread5_g, NULL);	pthread_join( fin_thread5_b, NULL);
+		pthread_join( fin_thread6_r, NULL);	pthread_join( fin_thread6_g, NULL);	pthread_join( fin_thread6_b, NULL);
+		pthread_join( fin_thread7_r, NULL);	pthread_join( fin_thread7_g, NULL);	pthread_join( fin_thread7_b, NULL);
+		pthread_join( fin_thread8_r, NULL);	pthread_join( fin_thread8_g, NULL);	pthread_join( fin_thread8_b, NULL);
 
 		//extend the size form WxHx1 to WxHx3
 
