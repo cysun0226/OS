@@ -134,11 +134,11 @@ void *extend_color(void* arg_ptr)
 	// unsigned char* pic_blur = (unsigned char*) arg->blur_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		// pthread_mutex_lock(&mutex);
+		pthread_mutex_lock(&mutex);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + color] = pic_blur[j*imgWidth + i];
 		}
-		// pthread_mutex_unlock(&mutex);
+		pthread_mutex_unlock(&mutex);
 	}
 
 }
