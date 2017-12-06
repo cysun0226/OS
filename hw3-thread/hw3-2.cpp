@@ -144,11 +144,9 @@ void *extend_r(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		pthread_mutex_lock(&mutex);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYRED] = image[j*imgWidth + i];
 		}
-		pthread_mutex_unlock(&mutex);
 	}
 }
 
@@ -157,11 +155,9 @@ void *extend_g(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		pthread_mutex_lock(&mutex);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYGREEN] = image[j*imgWidth + i];
 		}
-		pthread_mutex_unlock(&mutex);
 	}
 }
 
@@ -170,11 +166,9 @@ void *extend_b(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		pthread_mutex_lock(&mutex);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYBLUE] = image[j*imgWidth + i];
 		}
-		pthread_mutex_unlock(&mutex);
 	}
 }
 
@@ -316,14 +310,6 @@ int main()
 		pthread_join( x_thread8, NULL);
 		pthread_join( y_thread8, NULL);
 		pthread_create(&img_thread8, NULL, computeImg, &arg8);
-
-
-
-
-
-
-
-
 
 		//extend the size form WxHx1 to WxHx3
 		pthread_t ext_r_thread1, ext_r_thread2, ext_r_thread3, ext_r_thread4;
