@@ -1,6 +1,7 @@
 g++ -std=c++11 -pthread $1 -o sobel.out
 ./sobel.out
-echo "\n--- check Sobel1.bmp ---"
+echo""
+echo "--- check Sobel1.bmp ---"
 ./MAE.out ANS/Sobel1.bmp Sobel1.bmp
 echo "--- check Sobel2.bmp ---"
 ./MAE.out ANS/Sobel2.bmp Sobel2.bmp
