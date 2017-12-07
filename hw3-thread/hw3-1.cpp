@@ -12,10 +12,6 @@
 
 // #define PRINT_TIME
 
-#ifdef PRINT_TIME
-#include "time.h"
-#endif
-
 using namespace std;
 
 #define MYRED	2
