@@ -108,7 +108,7 @@ unsigned char unbnd_applyFilter(int w, int h, int* filter)
 
 unsigned char sobel(int i,int j, unsigned char* image_x, unsigned char* image_y)
 {
-	unsigned long long tmp = 0;
+	unsigned int tmp = 0;
 	tmp = image_x[j*imgWidth + i]*image_x[j*imgWidth + i] + image_y[j*imgWidth + i]*image_y[j*imgWidth + i];
 	tmp = sqrt(tmp);
 	if (tmp > 255) tmp = 255;
@@ -454,34 +454,37 @@ int main()
 		pthread_t y_thread5, y_thread6, y_thread7, y_thread8;
 
 		pthread_join( grey_thread1, NULL);
+		pthread_join( grey_thread2, NULL);
+
+
+
 		pthread_create(&x_thread1, NULL, applyX, &arg1);
 		pthread_create(&y_thread1, NULL, applyY, &arg1);
 
-		pthread_join( grey_thread2, NULL);
+		pthread_join( grey_thread3, NULL);
 		pthread_create(&x_thread2, NULL, applyX, &arg2);
 		pthread_create(&y_thread2, NULL, applyY, &arg2);
 
-		pthread_join( grey_thread3, NULL);
+		pthread_join( grey_thread4, NULL);
 		pthread_create(&x_thread3, NULL, applyX, &arg3);
 		pthread_create(&y_thread3, NULL, applyY, &arg3);
 
-		pthread_join( grey_thread4, NULL);
+		pthread_join( grey_thread5, NULL);
 		pthread_create(&x_thread4, NULL, applyX, &arg4);
 		pthread_create(&y_thread4, NULL, applyY, &arg4);
 
-		pthread_join( grey_thread5, NULL);
+		pthread_join( grey_thread6, NULL);
 		pthread_create(&x_thread5, NULL, applyX, &arg5);
 		pthread_create(&y_thread5, NULL, applyY, &arg5);
 
-		pthread_join( grey_thread6, NULL);
+		pthread_join( grey_thread7, NULL);
 		pthread_create(&x_thread6, NULL, applyX, &arg6);
 		pthread_create(&y_thread6, NULL, applyY, &arg6);
 
-		pthread_join( grey_thread7, NULL);
+		pthread_join( grey_thread8, NULL);
 		pthread_create(&x_thread7, NULL, applyX, &arg7);
 		pthread_create(&y_thread7, NULL, applyY, &arg7);
 
-		pthread_join( grey_thread8, NULL);
 		pthread_create(&x_thread8, NULL, applyX, &arg8);
 		pthread_create(&y_thread8, NULL, applyY, &arg8);
 
@@ -492,34 +495,34 @@ int main()
 
 		pthread_join( x_thread1, NULL);
 		pthread_join( y_thread1, NULL);
-		pthread_create(&img_thread1, NULL, computeImg, &arg1);
 
 		pthread_join( x_thread2, NULL);
 		pthread_join( y_thread2, NULL);
-		pthread_create(&img_thread2, NULL, computeImg, &arg2);
+		pthread_create(&img_thread1, NULL, computeImg, &arg1);
 
 		pthread_join( x_thread3, NULL);
 		pthread_join( y_thread3, NULL);
-		pthread_create(&img_thread3, NULL, computeImg, &arg3);
+		pthread_create(&img_thread2, NULL, computeImg, &arg2);
 
 		pthread_join( x_thread4, NULL);
 		pthread_join( y_thread4, NULL);
-		pthread_create(&img_thread4, NULL, computeImg, &arg4);
+		pthread_create(&img_thread3, NULL, computeImg, &arg3);
 
 		pthread_join( x_thread5, NULL);
 		pthread_join( y_thread5, NULL);
-		pthread_create(&img_thread5, NULL, computeImg, &arg5);
+		pthread_create(&img_thread4, NULL, computeImg, &arg4);
 
 		pthread_join( x_thread6, NULL);
 		pthread_join( y_thread6, NULL);
-		pthread_create(&img_thread6, NULL, computeImg, &arg6);
+		pthread_create(&img_thread5, NULL, computeImg, &arg5);
 
 		pthread_join( x_thread7, NULL);
 		pthread_join( y_thread7, NULL);
-		pthread_create(&img_thread7, NULL, computeImg, &arg7);
+		pthread_create(&img_thread6, NULL, computeImg, &arg6);
 
 		pthread_join( x_thread8, NULL);
 		pthread_join( y_thread8, NULL);
+		pthread_create(&img_thread7, NULL, computeImg, &arg7);
 		pthread_create(&img_thread8, NULL, computeImg, &arg8);
 
 		//extend the size form WxHx1 to WxHx3
