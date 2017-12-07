@@ -76,6 +76,27 @@ unsigned char applyFilter(int w, int h, int* filter)
 	return (unsigned char)tmp;
 }
 
+unsigned char unbnd_applyFilter(int w, int h, int* filter)
+{
+	int tmp = 0;
+	int a, b;
+
+	for (int j = 0; j<::ws; j++)
+	for (int i = 0; i<::ws; i++)
+	{
+		a = w + i - (::ws / 2);
+		b = h + j - (::ws / 2);
+
+		// detect for borders of the image
+
+		tmp += filter[j*::ws + i] * pic_grey[b*imgWidth + a];
+	};
+	// tmp /= FILTER_SCALE;
+	if (tmp < 0) tmp = 0;
+	if (tmp > 255) tmp = 255;
+	return (unsigned char)tmp;
+}
+
 unsigned char sobel(int i,int j, unsigned char* image_x, unsigned char* image_y)
 {
 	unsigned long long tmp = 0;
@@ -116,11 +137,57 @@ void *applyX(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
-	for (int j = arg->j_low; j<arg->j_up; j++) {
-		for (int i = 0; i<imgWidth; i++) {
-			image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
-		}
+
+	if (arg->j_low == 0 || arg->j_up == imgHeight) {
+	  for (int j = arg->j_low; j<arg->j_low+::ws; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	  }
+	  for (int j = arg->j_low+::ws; j<arg->j_up-::ws; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_x[j*imgWidth + i] = unbnd_applyFilter(i, j, filter_x);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	  }
+	  for (int j = arg->j_up-::ws; j<arg->j_up; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	  }
 	}
+	else {
+	  for (int j = arg->j_low; j<arg->j_up; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_x[j*imgWidth + i] = unbnd_applyFilter(i, j, filter_x);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
+	    }
+	  }
+	}
+
+
 	sem_post(arg->sem);
 }
 
@@ -129,10 +196,53 @@ void *applyY(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
-	for (int j = arg->j_low; j<arg->j_up; j++) {
-		for (int i = 0; i<imgWidth; i++) {
-			image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
-		}
+	if (arg->j_low == 0 || arg->j_up == imgHeight) {
+	  for (int j = arg->j_low; j<arg->j_low+::ws; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	  }
+	  for (int j = arg->j_low+::ws; j<arg->j_up-::ws; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_y[j*imgWidth + i] = unbnd_applyFilter(i, j, filter_y);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	  }
+	  for (int j = arg->j_up-::ws; j<arg->j_up; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	  }
+	}
+	else {
+	  for (int j = arg->j_low; j<arg->j_up; j++) {
+	    for (int i = 0; i<::ws; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	    for (int i = ::ws; i<imgWidth-::ws; i++) {
+	      image_y[j*imgWidth + i] = unbnd_applyFilter(i, j, filter_y);
+	    }
+	    for (int i = imgWidth-::ws; i<imgWidth; i++) {
+	      image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
+	    }
+	  }
 	}
 	sem_post(arg->sem);
 }
