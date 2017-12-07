@@ -448,35 +448,35 @@ int main()
 		pthread_t y_thread1, y_thread2, y_thread3, y_thread4;
 		pthread_t y_thread5, y_thread6, y_thread7, y_thread8;
 
-		// pthread_join( grey_thread1, NULL);
+		pthread_join( grey_thread1, NULL);
 		pthread_create(&x_thread1, NULL, applyX, &arg1);
 		pthread_create(&y_thread1, NULL, applyY, &arg1);
 
-		// pthread_join( grey_thread2, NULL);
+		pthread_join( grey_thread2, NULL);
 		pthread_create(&x_thread2, NULL, applyX, &arg2);
 		pthread_create(&y_thread2, NULL, applyY, &arg2);
 
-		// pthread_join( grey_thread3, NULL);
+		pthread_join( grey_thread3, NULL);
 		pthread_create(&x_thread3, NULL, applyX, &arg3);
 		pthread_create(&y_thread3, NULL, applyY, &arg3);
 
-		// pthread_join( grey_thread4, NULL);
+		pthread_join( grey_thread4, NULL);
 		pthread_create(&x_thread4, NULL, applyX, &arg4);
 		pthread_create(&y_thread4, NULL, applyY, &arg4);
 
-		// pthread_join( grey_thread5, NULL);
+		pthread_join( grey_thread5, NULL);
 		pthread_create(&x_thread5, NULL, applyX, &arg5);
 		pthread_create(&y_thread5, NULL, applyY, &arg5);
 
-		// pthread_join( grey_thread6, NULL);
+		pthread_join( grey_thread6, NULL);
 		pthread_create(&x_thread6, NULL, applyX, &arg6);
 		pthread_create(&y_thread6, NULL, applyY, &arg6);
 
-		// pthread_join( grey_thread7, NULL);
+		pthread_join( grey_thread7, NULL);
 		pthread_create(&x_thread7, NULL, applyX, &arg7);
 		pthread_create(&y_thread7, NULL, applyY, &arg7);
 
-		// pthread_join( grey_thread8, NULL);
+		pthread_join( grey_thread8, NULL);
 		pthread_create(&x_thread8, NULL, applyX, &arg8);
 		pthread_create(&y_thread8, NULL, applyY, &arg8);
 
