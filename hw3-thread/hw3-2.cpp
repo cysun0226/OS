@@ -184,10 +184,11 @@ void *convertGrey(void* arg_ptr)
 void *applyX(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
-	sem_wait(arg->sem);
 	while (try_sync(arg->num) != 1) {
 		;/* waiting */
 	}
+
+	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 
 	if (arg->j_low == 0 || arg->j_up == imgHeight) {
@@ -246,10 +247,10 @@ void *applyX(void* arg_ptr)
 void *applyY(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
-	sem_wait(arg->sem);
 	while (try_sync(arg->num) != 1) {
 		;/* waiting */
 	}
+	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 	if (arg->j_low == 0 || arg->j_up == imgHeight) {
 	  for (int j = arg->j_low; j<arg->j_low+::ws; j++) {
