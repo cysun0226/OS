@@ -22,7 +22,7 @@ int FILTER_SCALE;
 int *filter_x;
 int *filter_y;
 
-sem_t sem1, sem2, sem3, sem4, sem5, sem6, sem7, sem8;
+sem_t sem1, sem2, sem3, sem4, sem5, sem6, sem7, sem8, sem;
 
 const char *inputfile_name[5] = {
 	"input1.bmp",
@@ -170,7 +170,8 @@ void *convertGrey(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
 
-	sem_wait(arg->sem);
+	// sem_wait(arg->sem);
+	sem_wait(&sem);
 	// unsigned char* pic_grey = (unsigned char*) arg->pic_ptr;
 	for (int j = arg->j_low; j<arg->j_up; j++) {
 		for (int i = 0; i<imgWidth; i++) {
@@ -178,7 +179,8 @@ void *convertGrey(void* arg_ptr)
 		}
 	}
 	*arg->start = 1;
-	sem_post(arg->sem);
+	// sem_post(arg->sem);
+	sem_post(&sem);
 }
 
 void *applyX(void* arg_ptr)
@@ -187,8 +189,10 @@ void *applyX(void* arg_ptr)
 	while (try_sync(arg->num) != 1) {
 		;/* waiting */
 	}
+	sem_wait(&sem);
 
-	sem_wait(arg->sem);
+
+	// sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 
 	if (arg->j_low == 0 || arg->j_up == imgHeight) {
@@ -241,15 +245,15 @@ void *applyX(void* arg_ptr)
 	}
 
 
-	sem_post(arg->sem);
+	sem_post(&sem);
 }
 
 void *applyY(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
-	while (try_sync(arg->num) != 1) {
-		;/* waiting */
-	}
+	// while (try_sync(arg->num) != 1) {
+	// 	;/* waiting */
+	// }
 	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 	if (arg->j_low == 0 || arg->j_up == imgHeight) {
@@ -372,6 +376,7 @@ void *extend_b(void* arg_ptr)
 int main()
 {
 	// initialize semaphore
+	sem_init(&sem, 0, 8);
 	sem_init(&sem1, 0, 1);
 	sem_init(&sem2, 0, 1);
 	sem_init(&sem3, 0, 1);
