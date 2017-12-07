@@ -40,6 +40,15 @@ const char *outputSobel_name[5] = {
 	"Sobel5.bmp"
 };
 
+int gStart_1 = 0;
+int gStart_2 = 0;
+int gStart_3 = 0;
+int gStart_4 = 0;
+int gStart_5 = 0;
+int gStart_6 = 0;
+int gStart_7 = 0;
+int gStart_8 = 0;
+
 unsigned char *pic_in, *pic_grey, *image_x, *image_y, *image, *pic_blur, *pic_final;
 
 unsigned char RGB2grey(int w, int h)
@@ -110,13 +119,52 @@ unsigned char sobel(int i,int j, unsigned char* image_x, unsigned char* image_y)
 // thread functions
 typedef struct
 {
-  unsigned char* pic_ptr;
-	unsigned char* blur_ptr;
   int j_up;
 	int j_low;
 	int color_ptr;
 	sem_t* sem;
+	int part;
+	int* start;
+	int num;
 } Parameter;
+
+int try_sync(int num)
+{
+	switch (num)
+	{
+		case 1:
+		if(gStart_1 && gStart_2) return 1;
+		else return 0;
+
+		case 2:
+		if(gStart_1 && gStart_2 && gStart_3) return 1;
+		else return 0;
+
+		case 3:
+		if(gStart_2 && gStart_3 && gStart_4) return 1;
+		else return 0;
+
+		case 4:
+		if(gStart_3 && gStart_4 && gStart_5) return 1;
+		else return 0;
+
+		case 5:
+		if(gStart_4 && gStart_5 && gStart_6) return 1;
+		else return 0;
+
+		case 6:
+		if(gStart_5 && gStart_6 && gStart_7) return 1;
+		else return 0;
+
+		case 7:
+		if(gStart_6 && gStart_7 && gStart_8) return 1;
+		else return 0;
+
+		case 8:
+		if(gStart_7 && gStart_8) return 1;
+		else return 0;
+	}
+}
 
 void *convertGrey(void* arg_ptr)
 {
@@ -129,6 +177,7 @@ void *convertGrey(void* arg_ptr)
 			pic_grey[j*imgWidth + i] = RGB2grey(i, j);
 		}
 	}
+	*arg->start = 1;
 	sem_post(arg->sem);
 }
 
@@ -136,6 +185,9 @@ void *applyX(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
 	sem_wait(arg->sem);
+	while (try_sync(arg->num) != 1) {
+		;/* waiting */
+	}
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 
 	if (arg->j_low == 0 || arg->j_up == imgHeight) {
@@ -195,6 +247,9 @@ void *applyY(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
 	sem_wait(arg->sem);
+	while (try_sync(arg->num) != 1) {
+		;/* waiting */
+	}
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 	if (arg->j_low == 0 || arg->j_up == imgHeight) {
 	  for (int j = arg->j_low; j<arg->j_low+::ws; j++) {
@@ -365,14 +420,14 @@ int main()
 		Parameter arg1, arg2, arg3, arg4;
 		Parameter arg5, arg6, arg7, arg8;
 
-		arg1.j_low = 0; arg1.j_up = imgHeight/8; arg1.sem = &sem1;
-		arg2.j_low = imgHeight/8; arg2.j_up = imgHeight/4; arg2.sem = &sem2;
-		arg3.j_low = imgHeight/4; arg3.j_up = (imgHeight/8)*3; arg3.sem = &sem3;
-		arg4.j_low = (imgHeight/8)*3; arg4.j_up = imgHeight/2; arg4.sem = &sem4;
-		arg5.j_low = imgHeight/2; arg5.j_up = (imgHeight/8)*5; arg5.sem = &sem5;
-		arg6.j_low = (imgHeight/8)*5; arg6.j_up = (imgHeight/8)*6; arg6.sem = &sem6;
-		arg7.j_low = (imgHeight/8)*6; arg7.j_up = (imgHeight/8)*7; arg7.sem = &sem7;
-		arg8.j_low = (imgHeight/8)*7; arg8.j_up = imgHeight; arg8.sem = &sem8;
+		arg1.j_low = 0; arg1.j_up = imgHeight/8; arg1.sem = &sem1; arg1.num = 1; arg1.start = &gStart_1;
+		arg2.j_low = imgHeight/8; arg2.j_up = imgHeight/4; arg2.sem = &sem2; arg2.num = 2; arg2.start = &gStart_2;
+		arg3.j_low = imgHeight/4; arg3.j_up = (imgHeight/8)*3; arg3.sem = &sem3; arg3.num = 3; arg3.start = &gStart_3;
+		arg4.j_low = (imgHeight/8)*3; arg4.j_up = imgHeight/2; arg4.sem = &sem4; arg4.num = 4; arg4.start = &gStart_4;
+		arg5.j_low = imgHeight/2; arg5.j_up = (imgHeight/8)*5; arg5.sem = &sem5; arg5.num = 5; arg5.start = &gStart_5;
+		arg6.j_low = (imgHeight/8)*5; arg6.j_up = (imgHeight/8)*6; arg6.sem = &sem6; arg6.num = 6; arg6.start = &gStart_6;
+		arg7.j_low = (imgHeight/8)*6; arg7.j_up = (imgHeight/8)*7; arg7.sem = &sem7; arg7.num = 7; arg7.start = &gStart_7;
+		arg8.j_low = (imgHeight/8)*7; arg8.j_up = imgHeight; arg8.sem = &sem8; arg8.num = 8; arg8.start = &gStart_8;
 
 		pthread_create(&grey_thread1, NULL, convertGrey, &arg1);
 		pthread_create(&grey_thread2, NULL, convertGrey, &arg2);
@@ -392,35 +447,35 @@ int main()
 		pthread_t y_thread1, y_thread2, y_thread3, y_thread4;
 		pthread_t y_thread5, y_thread6, y_thread7, y_thread8;
 
-		pthread_join( grey_thread1, NULL);
+		// pthread_join( grey_thread1, NULL);
 		pthread_create(&x_thread1, NULL, applyX, &arg1);
 		pthread_create(&y_thread1, NULL, applyY, &arg1);
 
-		pthread_join( grey_thread2, NULL);
+		// pthread_join( grey_thread2, NULL);
 		pthread_create(&x_thread2, NULL, applyX, &arg2);
 		pthread_create(&y_thread2, NULL, applyY, &arg2);
 
-		pthread_join( grey_thread3, NULL);
+		// pthread_join( grey_thread3, NULL);
 		pthread_create(&x_thread3, NULL, applyX, &arg3);
 		pthread_create(&y_thread3, NULL, applyY, &arg3);
 
-		pthread_join( grey_thread4, NULL);
+		// pthread_join( grey_thread4, NULL);
 		pthread_create(&x_thread4, NULL, applyX, &arg4);
 		pthread_create(&y_thread4, NULL, applyY, &arg4);
 
-		pthread_join( grey_thread5, NULL);
+		// pthread_join( grey_thread5, NULL);
 		pthread_create(&x_thread5, NULL, applyX, &arg5);
 		pthread_create(&y_thread5, NULL, applyY, &arg5);
 
-		pthread_join( grey_thread6, NULL);
+		// pthread_join( grey_thread6, NULL);
 		pthread_create(&x_thread6, NULL, applyX, &arg6);
 		pthread_create(&y_thread6, NULL, applyY, &arg6);
 
-		pthread_join( grey_thread7, NULL);
+		// pthread_join( grey_thread7, NULL);
 		pthread_create(&x_thread7, NULL, applyX, &arg7);
 		pthread_create(&y_thread7, NULL, applyY, &arg7);
 
-		pthread_join( grey_thread8, NULL);
+		// pthread_join( grey_thread8, NULL);
 		pthread_create(&x_thread8, NULL, applyX, &arg8);
 		pthread_create(&y_thread8, NULL, applyY, &arg8);
 
@@ -504,6 +559,15 @@ int main()
 		free(image_y);
 		free(image);
 		free(pic_final);
+
+		gStart_1 = 0;
+		gStart_2 = 0;
+		gStart_3 = 0;
+		gStart_4 = 0;
+		gStart_5 = 0;
+		gStart_6 = 0;
+		gStart_7 = 0;
+		gStart_8 = 0;
 	}
 
 	return 0;
