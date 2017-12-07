@@ -251,9 +251,9 @@ void *applyX(void* arg_ptr)
 void *applyY(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
-	// while (try_sync(arg->num) != 1) {
-	// 	;/* waiting */
-	// }
+	while (try_sync(arg->num) != 1) {
+		;/* waiting */
+	}
 	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 	if (arg->j_low == 0 || arg->j_up == imgHeight) {
