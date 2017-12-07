@@ -108,7 +108,7 @@ unsigned char unbnd_applyFilter(int w, int h, int* filter)
 
 unsigned char sobel(int i,int j, unsigned char* image_x, unsigned char* image_y)
 {
-	unsigned int tmp = 0;
+	unsigned long tmp = 0;
 	tmp = image_x[j*imgWidth + i]*image_x[j*imgWidth + i] + image_y[j*imgWidth + i]*image_y[j*imgWidth + i];
 	tmp = sqrt(tmp);
 	if (tmp > 255) tmp = 255;
