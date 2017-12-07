@@ -22,7 +22,7 @@ int FILTER_SCALE;
 int *filter_x;
 int *filter_y;
 
-sem_t sem;
+sem_t sem1, sem2, sem3, sem4, sem5, sem6, sem7, sem8;
 
 const char *inputfile_name[5] = {
 	"input1.bmp",
@@ -94,39 +94,47 @@ typedef struct
   int j_up;
 	int j_low;
 	int color_ptr;
+	sem_t* sem;
 } Parameter;
 
 void *convertGrey(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
+
+	sem_wait(arg->sem);
 	// unsigned char* pic_grey = (unsigned char*) arg->pic_ptr;
 	for (int j = arg->j_low; j<arg->j_up; j++) {
 		for (int i = 0; i<imgWidth; i++) {
 			pic_grey[j*imgWidth + i] = RGB2grey(i, j);
 		}
 	}
+	sem_post(arg->sem);
 }
 
 void *applyX(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
+	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 	for (int j = arg->j_low; j<arg->j_up; j++) {
 		for (int i = 0; i<imgWidth; i++) {
 			image_x[j*imgWidth + i] = applyFilter(i, j, filter_x);
 		}
 	}
+	sem_post(arg->sem);
 }
 
 void *applyY(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
+	sem_wait(arg->sem);
 	// unsigned char* pic_blur = (unsigned char*) arg->pic_ptr;
 	for (int j = arg->j_low; j<arg->j_up; j++) {
 		for (int i = 0; i<imgWidth; i++) {
 			image_y[j*imgWidth + i] = applyFilter(i, j, filter_y);
 		}
 	}
+	sem_post(arg->sem);
 }
 
 void *computeImg(void* arg_ptr)
@@ -140,16 +148,31 @@ void *computeImg(void* arg_ptr)
 	}
 }
 
+void *extend(void* arg_ptr)
+{
+	Parameter* arg = (Parameter*) arg_ptr;
+	// unsigned char* pic_blur = (unsigned char*) arg->blur_ptr;
+	// pthread_mutex_lock(&mutex);
+	for (int j = arg->j_low; j<arg->j_up; j++) {
+		for (int i = 0; i<imgWidth; i++) {
+			pic_final[3 * (j*imgWidth + i) + MYRED] = image[j*imgWidth + i];
+			pic_final[3 * (j*imgWidth + i) + MYGREEN] = image[j*imgWidth + i];
+			pic_final[3 * (j*imgWidth + i) + MYBLUE] = image[j*imgWidth + i];
+		}
+	}
+	// pthread_mutex_unlock(&mutex);
+}
+
 void *extend_r(void* arg_ptr)
 {
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		sem_wait(&sem);
+		// sem_wait(&sem);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYRED] = image[j*imgWidth + i];
 		}
-		sem_post(&sem);
+		// sem_post(&sem);
 	}
 }
 
@@ -158,11 +181,11 @@ void *extend_g(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		sem_wait(&sem);
+		// sem_wait(&sem);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYGREEN] = image[j*imgWidth + i];
 		}
-		sem_post(&sem);
+		// sem_post(&sem);
 	}
 }
 
@@ -171,11 +194,11 @@ void *extend_b(void* arg_ptr)
 	Parameter* arg = (Parameter*) arg_ptr;
 
 	for (int j = arg->j_low; j<arg->j_up; j++) {
-		sem_wait(&sem);
+		// sem_wait(&sem);
 		for (int i = 0; i<imgWidth; i++) {
 			pic_final[3 * (j*imgWidth + i) + MYBLUE] = image[j*imgWidth + i];
 		}
-		sem_post(&sem);
+		// sem_post(&sem);
 	}
 }
 
@@ -183,7 +206,14 @@ void *extend_b(void* arg_ptr)
 int main()
 {
 	// initialize semaphore
-	sem_init(&sem, 0, 1);
+	sem_init(&sem1, 0, 1);
+	sem_init(&sem2, 0, 1);
+	sem_init(&sem3, 0, 1);
+	sem_init(&sem4, 0, 1);
+	sem_init(&sem5, 0, 1);
+	sem_init(&sem6, 0, 1);
+	sem_init(&sem7, 0, 1);
+	sem_init(&sem8, 0, 1);
 
 	// read mask file
 	FILE* mask;
@@ -225,14 +255,14 @@ int main()
 		Parameter arg1, arg2, arg3, arg4;
 		Parameter arg5, arg6, arg7, arg8;
 
-		arg1.j_low = 0; arg1.j_up = imgHeight/8;
-		arg2.j_low = imgHeight/8; arg2.j_up = imgHeight/4;
-		arg3.j_low = imgHeight/4; arg3.j_up = (imgHeight/8)*3;
-		arg4.j_low = (imgHeight/8)*3; arg4.j_up = imgHeight/2;
-		arg5.j_low = imgHeight/2; arg5.j_up = (imgHeight/8)*5;
-		arg6.j_low = (imgHeight/8)*5; arg6.j_up = (imgHeight/8)*6;
-		arg7.j_low = (imgHeight/8)*6; arg7.j_up = (imgHeight/8)*7;
-		arg8.j_low = (imgHeight/8)*7; arg8.j_up = imgHeight;
+		arg1.j_low = 0; arg1.j_up = imgHeight/8; arg1.sem = &sem1;
+		arg2.j_low = imgHeight/8; arg2.j_up = imgHeight/4; arg2.sem = &sem2;
+		arg3.j_low = imgHeight/4; arg3.j_up = (imgHeight/8)*3; arg3.sem = &sem3;
+		arg4.j_low = (imgHeight/8)*3; arg4.j_up = imgHeight/2; arg4.sem = &sem4;
+		arg5.j_low = imgHeight/2; arg5.j_up = (imgHeight/8)*5; arg5.sem = &sem5;
+		arg6.j_low = (imgHeight/8)*5; arg6.j_up = (imgHeight/8)*6; arg6.sem = &sem6;
+		arg7.j_low = (imgHeight/8)*6; arg7.j_up = (imgHeight/8)*7; arg7.sem = &sem7;
+		arg8.j_low = (imgHeight/8)*7; arg8.j_up = imgHeight; arg8.sem = &sem8;
 
 		pthread_create(&grey_thread1, NULL, convertGrey, &arg1);
 		pthread_create(&grey_thread2, NULL, convertGrey, &arg2);
@@ -322,96 +352,37 @@ int main()
 		pthread_create(&img_thread8, NULL, computeImg, &arg8);
 
 		//extend the size form WxHx1 to WxHx3
-		Parameter ext_arg1, ext_arg2, ext_arg3, ext_arg4;
-		Parameter ext_arg5, ext_arg6, ext_arg7, ext_arg8;
+		pthread_t ext_thread1, ext_thread2, ext_thread3, ext_thread4;
+		pthread_t ext_thread5, ext_thread6, ext_thread7, ext_thread8;
 
-		ext_arg1.j_low = 0; ext_arg1.j_up = imgHeight/4;
-		ext_arg2.j_low = imgHeight/4; ext_arg2.j_up = imgHeight/2;
-		ext_arg3.j_low = imgHeight/2; ext_arg3.j_up = (imgHeight/4)*3;
-		ext_arg4.j_low = (imgHeight/4)*3; ext_arg4.j_up = imgHeight;
+		pthread_join(img_thread1, NULL);
+		pthread_create(&ext_thread1, NULL, extend, &arg1);
+		pthread_join(img_thread2, NULL);
+		pthread_create(&ext_thread2, NULL, extend, &arg2);
 
-		pthread_t ext_r_thread1, ext_r_thread2, ext_r_thread3, ext_r_thread4;
-		pthread_t ext_r_thread5, ext_r_thread6, ext_r_thread7, ext_r_thread8;
-		pthread_t ext_g_thread1, ext_g_thread2, ext_g_thread3, ext_g_thread4;
-		pthread_t ext_g_thread5, ext_g_thread6, ext_g_thread7, ext_g_thread8;
-		pthread_t ext_b_thread1, ext_b_thread2, ext_b_thread3, ext_b_thread4;
-		pthread_t ext_b_thread5, ext_b_thread6, ext_b_thread7, ext_b_thread8;
+		pthread_join(img_thread3, NULL);
+		pthread_create(&ext_thread3, NULL, extend, &arg3);
+		pthread_join(img_thread4, NULL);
+		pthread_create(&ext_thread4, NULL, extend, &arg4);
 
-		pthread_join( img_thread1, NULL);
-		pthread_join( img_thread2, NULL);
-		pthread_create(&ext_r_thread1, NULL, extend_r, &ext_arg1);
-		pthread_create(&ext_g_thread1, NULL, extend_g, &ext_arg1);
-		pthread_create(&ext_b_thread1, NULL, extend_b, &ext_arg1);
+		pthread_join(img_thread5, NULL);
+		pthread_create(&ext_thread5, NULL, extend, &arg5);
+		pthread_join(img_thread6, NULL);
+		pthread_create(&ext_thread6, NULL, extend, &arg6);
 
-		pthread_join( img_thread3, NULL);
-		pthread_join( img_thread4, NULL);
-		pthread_create(&ext_r_thread2, NULL, extend_r, &ext_arg2);
-		pthread_create(&ext_g_thread2, NULL, extend_g, &ext_arg2);
-		pthread_create(&ext_b_thread2, NULL, extend_b, &ext_arg2);
+		pthread_join(img_thread7, NULL);
+		pthread_create(&ext_thread7, NULL, extend, &arg7);
+		pthread_join(img_thread8, NULL);
+		pthread_create(&ext_thread8, NULL, extend, &arg8);
 
-		pthread_join( img_thread5, NULL);
-		pthread_join( img_thread6, NULL);
-		pthread_create(&ext_r_thread3, NULL, extend_r, &ext_arg3);
-		pthread_create(&ext_g_thread3, NULL, extend_g, &ext_arg3);
-		pthread_create(&ext_b_thread3, NULL, extend_b, &ext_arg3);
-
-		pthread_join( img_thread7, NULL);
-		pthread_join( img_thread8, NULL);
-		pthread_create(&ext_r_thread4, NULL, extend_r, &ext_arg4);
-		pthread_create(&ext_g_thread4, NULL, extend_g, &ext_arg4);
-		pthread_create(&ext_b_thread4, NULL, extend_b, &ext_arg4);
-
-		// pthread_create(&ext_r_thread5, NULL, extend_r, &arg5);
-		// pthread_create(&ext_g_thread5, NULL, extend_g, &arg5);
-		// pthread_create(&ext_b_thread5, NULL, extend_b, &arg5);
-    //
-		// pthread_create(&ext_r_thread6, NULL, extend_r, &arg6);
-		// pthread_create(&ext_g_thread6, NULL, extend_g, &arg6);
-		// pthread_create(&ext_b_thread6, NULL, extend_b, &arg6);
-    //
-		// pthread_create(&ext_r_thread7, NULL, extend_r, &arg7);
-		// pthread_create(&ext_g_thread7, NULL, extend_g, &arg7);
-		// pthread_create(&ext_b_thread7, NULL, extend_b, &arg7);
-    //
-		// pthread_create(&ext_r_thread8, NULL, extend_r, &arg8);
-		// pthread_create(&ext_g_thread8, NULL, extend_g, &arg8);
-		// pthread_create(&ext_b_thread8, NULL, extend_b, &arg8);
-
-		pthread_join( ext_r_thread1, NULL);
-		pthread_join( ext_r_thread2, NULL);
-		pthread_join( ext_r_thread3, NULL);
-		pthread_join( ext_r_thread4, NULL);
-		// pthread_join( ext_r_thread5, NULL);
-		// pthread_join( ext_r_thread6, NULL);
-		// pthread_join( ext_r_thread7, NULL);
-		// pthread_join( ext_r_thread8, NULL);
-
-		pthread_join( ext_g_thread1, NULL);
-		pthread_join( ext_g_thread2, NULL);
-		pthread_join( ext_g_thread3, NULL);
-		pthread_join( ext_g_thread4, NULL);
-		// pthread_join( ext_g_thread5, NULL);
-		// pthread_join( ext_g_thread6, NULL);
-		// pthread_join( ext_g_thread7, NULL);
-		// pthread_join( ext_g_thread8, NULL);
-
-		pthread_join( ext_b_thread1, NULL);
-		pthread_join( ext_b_thread2, NULL);
-		pthread_join( ext_b_thread3, NULL);
-		pthread_join( ext_b_thread4, NULL);
-
-		// pthread_join( ext_b_thread5, NULL);
-		// pthread_join( ext_b_thread6, NULL);
-		// pthread_join( ext_b_thread7, NULL);
-		// pthread_join( ext_b_thread8, NULL);
-
-		// for (int j = 0; j<imgHeight; j++) {
-		// 	for (int i = 0; i<imgWidth; i++){
-		// 		pic_final[3 * (j*imgWidth + i) + MYRED] = image[j*imgWidth + i];
-		// 		pic_final[3 * (j*imgWidth + i) + MYGREEN] = image[j*imgWidth + i];
-		// 		pic_final[3 * (j*imgWidth + i) + MYBLUE] = image[j*imgWidth + i];
-		// 	}
-		// }
+		pthread_join( ext_thread1, NULL);
+		pthread_join( ext_thread2, NULL);
+		pthread_join( ext_thread3, NULL);
+		pthread_join( ext_thread4, NULL);
+		pthread_join( ext_thread5, NULL);
+		pthread_join( ext_thread6, NULL);
+		pthread_join( ext_thread7, NULL);
+		pthread_join( ext_thread8, NULL);
 
 		// write output BMP file
 		bmpReader->WriteBMP(outputSobel_name[k], imgWidth, imgHeight, pic_final);
