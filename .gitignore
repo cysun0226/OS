@@ -2,4 +2,8 @@ hw3-thread/ANS/
 example_hw3-1.cpp
 *.bmp
 *.out
+hw3-thread/.tags1
+hw3-thread/id_rsa.pub
+hw3-thread/thread.cpp
+hw3-thread/time.txt
 
