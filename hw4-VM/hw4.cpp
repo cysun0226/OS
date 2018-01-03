@@ -71,19 +71,22 @@ int main(int argc, char* argv[])
 		TLBiter = TLB.find(page_number);
 		// TLB hit
 		if(TLBiter != TLB.end()) {
-			cout << "TLB hit, frame number = " << bitset<8>(TLBiter->second) << endl;
+			// cout << "TLB hit, frame number = " << bitset<8>(TLBiter->second) << endl;
+			phy_addr = ((unsigned char)TLBiter->second << 8) + offset;
+			cout << int(phy_addr) << endl;
 			TLB_hit++;
 		}
 		// TLB miss
 		else {
 			if (page_table[page_number] != -1) {
-				cout << "find in page table, frame number = " << page_table[page_number] << endl;
+				// cout << "find in page table, frame number = " << page_table[page_number] << endl;
+				phy_addr = ((unsigned char)page_table[page_number] << 8) + offset;
+				cout << int(phy_addr) << endl;
 			}
 			// page fault
 			else {
-				cout << "page fault!" << endl;
+				// cout << "page fault!" << endl;
 				page_flt++;
-
 				// Update TLB and page table
 				physical_memory.push_back(0);
 				int frame_number = physical_memory.size()-1;
@@ -96,6 +99,9 @@ int main(int argc, char* argv[])
 					TLB[page_number] = frame_number;
 					LRU.erase(LRU.begin());
 				}
+
+				phy_addr = ((unsigned char)frame_number << 8) + offset;
+				cout << int(phy_addr) << endl;
 			}
 
 
