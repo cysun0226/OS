@@ -75,7 +75,6 @@ int main(int argc, char* argv[])
 		if(TLBiter != TLB.end()) {
 			// cout << "TLB hit, frame number = " << bitset<8>(TLBiter->second) << endl;
 			phy_addr = ((unsigned char)TLBiter->second << 8) + offset;
-			// cout << int(phy_addr) << ' ' << int(frame[offset]) << endl;
 			cout << int(phy_addr) << ' ' << int(physical_memory[TLBiter->second][offset]) << endl;
 			TLB_hit++;
 		}
@@ -116,14 +115,13 @@ int main(int argc, char* argv[])
 				phy_addr = ((unsigned char)frame_number << 8) + offset;
 				cout << int(phy_addr) << ' ' << int(frame[offset]) << endl;
 			}
-
-
 		}
-
 		// cout << "addr = " << log_addr << endl;
 		// cout << bitset<8>(page_number) << ' ' << bitset<8>(offset) << endl << endl;
 	}
 
 	cout << "TLB hits: " << TLB_hit << endl;
 	cout << "Page faults: " << page_flt << endl;
+
+	return 0;
 }
