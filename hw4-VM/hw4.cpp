@@ -4,6 +4,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <bitset>
+#include <vector>
+#include <map>
+#include <algorithm>
+
 using namespace std;
 
 #define TLB_SIZE 16
@@ -13,15 +18,93 @@ using namespace std;
 #define FRAME_NUM 256
 #define PHYSICAL_MEMORY 65536
 
+typedef unsigned char Page[PAGE_SIZE];
+typedef unsigned char Frame[FRAME_SIZE];
+
+std::vector<unsigned char> physical_memory;
+
+map<int, int> TLB; // page number, frame number
+map<int, int>::iterator TLBiter;
+std::vector<int> LRU;
+std::vector<int>::iterator LRUiter;
+
+int page_table[PAGE_TABLE_SIZE];
+
+void page_table_init(int* ptab)
+{
+	for (size_t i = 0; i < PAGE_TABLE_SIZE; i++) {
+		page_table[i] = -1;
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	fstream backing_file, addr_file;
 	backing_file.open(argv[1], ios::in);
 	addr_file.open(argv[2], ios::in);
 
+	int TLB_hit = 0, page_flt = 0;
+	page_table_init(page_table);
+
+	int addr_num;
+	addr_file >> addr_num;
 	unsigned short log_addr;
-	for (size_t i = 0; i < 10; i++) {
+	for (size_t i = 0; i < addr_num; i++)
+	{
+		unsigned char page_number, offset;
 		addr_file >> log_addr;
-		cout << log_addr << endl;
+		offset = log_addr & 0b11111111;
+		page_number = log_addr >> 8;
+
+		// update LRU
+		LRUiter = find(LRU.begin(), LRU.end(), page_number);
+		if (LRUiter != LRU.end()) { // exist in LRU, pop the original one and push again
+			LRU.erase(LRUiter);
+			LRU.push_back(page_number);
+		}
+  	else
+    	LRU.push_back(page_number);
+
+		int phy_addr = 0;
+
+		/* check TLB */
+		TLBiter = TLB.find(page_number);
+		// TLB hit
+		if(TLBiter != TLB.end()) {
+			cout << "TLB hit, frame number = " << bitset<8>(TLBiter->second) << endl;
+			TLB_hit++;
+		}
+		// TLB miss
+		else {
+			if (page_table[page_number] != -1) {
+				cout << "find in page table, frame number = " << page_table[page_number] << endl;
+			}
+			// page fault
+			else {
+				cout << "page fault!" << endl;
+				page_flt++;
+
+				// Update TLB and page table
+				physical_memory.push_back(0);
+				int frame_number = physical_memory.size()-1;
+				page_table[page_number] = frame_number;
+				if(TLB.size() < TLB_SIZE)
+					TLB[page_number] = frame_number;
+				else {
+					// remove the bottom of LRU
+					TLB.erase(LRU[0]);
+					TLB[page_number] = frame_number;
+					LRU.erase(LRU.begin());
+				}
+			}
+
+
+		}
+
+		// cout << "addr = " << log_addr << endl;
+		// cout << bitset<8>(page_number) << ' ' << bitset<8>(offset) << endl << endl;
 	}
+
+	cout << "TLB hits: " << TLB_hit << endl;
+	cout << "Page faults: " << page_flt << endl;
 }
