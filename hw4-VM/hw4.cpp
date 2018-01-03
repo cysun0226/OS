@@ -3,11 +3,13 @@
 // Date       : 2018.01.02
 
 #include <iostream>
+#include <cstdio>
 #include <fstream>
 #include <bitset>
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <cstdint>
 
 using namespace std;
 
@@ -19,9 +21,9 @@ using namespace std;
 #define PHYSICAL_MEMORY 65536
 
 typedef unsigned char Page[PAGE_SIZE];
-typedef unsigned char Frame[FRAME_SIZE];
+// typedef unsigned char Frame[FRAME_SIZE];
 
-std::vector<unsigned char> physical_memory;
+std::vector<char*> physical_memory;
 
 map<int, int> TLB; // page number, frame number
 map<int, int>::iterator TLBiter;
@@ -73,7 +75,8 @@ int main(int argc, char* argv[])
 		if(TLBiter != TLB.end()) {
 			// cout << "TLB hit, frame number = " << bitset<8>(TLBiter->second) << endl;
 			phy_addr = ((unsigned char)TLBiter->second << 8) + offset;
-			cout << int(phy_addr) << endl;
+			// cout << int(phy_addr) << ' ' << int(frame[offset]) << endl;
+			cout << int(phy_addr) << ' ' << int(physical_memory[TLBiter->second][offset]) << endl;
 			TLB_hit++;
 		}
 		// TLB miss
@@ -81,14 +84,24 @@ int main(int argc, char* argv[])
 			if (page_table[page_number] != -1) {
 				// cout << "find in page table, frame number = " << page_table[page_number] << endl;
 				phy_addr = ((unsigned char)page_table[page_number] << 8) + offset;
-				cout << int(phy_addr) << endl;
+				cout << int(phy_addr) << ' ' << int(physical_memory[page_table[page_number]][offset]) << endl;
 			}
 			// page fault
 			else {
 				// cout << "page fault!" << endl;
 				page_flt++;
 				// Update TLB and page table
-				physical_memory.push_back(0);
+				// move data from backing store to physical memory
+				char* frame;
+				frame = new char[FRAME_SIZE];
+				FILE *bs;
+				bs = fopen(argv[1], "rb");
+				fseek(bs, 0, SEEK_SET); // front
+				fseek(bs, page_number*PAGE_SIZE, SEEK_CUR);
+				fread(frame, sizeof(unsigned char), FRAME_SIZE, bs);
+
+				// *f = 0;
+				physical_memory.push_back(frame);
 				int frame_number = physical_memory.size()-1;
 				page_table[page_number] = frame_number;
 				if(TLB.size() < TLB_SIZE)
@@ -101,7 +114,7 @@ int main(int argc, char* argv[])
 				}
 
 				phy_addr = ((unsigned char)frame_number << 8) + offset;
-				cout << int(phy_addr) << endl;
+				cout << int(phy_addr) << ' ' << int(frame[offset]) << endl;
 			}
 
 
