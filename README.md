@@ -26,4 +26,4 @@ mutex lock
 ### 3-2 Edge detection with Sobel filter
 semaphone
 
-## hw4 - Design a virual memory manager
+## hw4 - Design a virtual memory manager
